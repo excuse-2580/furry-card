@@ -3,22 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Furry 扩列墙 · 兽设名片</title>
-<meta name="description" content="做一张自己的兽设扩列名片，导出成图片分享；也可以把遇到的兽友收进本地扩列墙。全部数据存在你自己的浏览器里。">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M6 4l4 5 4-5 4 5 4-5 4 5-2 3-2-2-2 2-2-2-2 2-2-2-2 2-2-2z' fill='%237C4DFF'/%3E%3Ccircle cx='11' cy='18' r='2' fill='%237C4DFF'/%3E%3Ccircle cx='21' cy='18' r='2' fill='%237C4DFF'/%3E%3Cpath d='M16 21c-2 0-3 1-3 3s1.5 3 3 3 3-1 3-3-1-3-3-3z' fill='%237C4DFF'/%3E%3C/svg%3E">
+<title>Furry 扩列地图 · 兽设名片</title>
+<meta name="description" content="做一张自己的兽设名片，支持上传头像与背景图；在地图上标注位置，看看附近有哪些兽友。数据全在你自己的浏览器里。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%237C4DFF'/%3E%3Cpath d='M16 6l4 7-4 13-4-13z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header class="topbar">
   <div class="topbar__in">
-    <span class="brand">
-      <span class="brand__ico">🐾</span>
-      <span>Furry 扩列墙</span>
-    </span>
+    <span class="brand"><span class="brand__ico">🗺️</span><span>扩列地图</span></span>
     <nav class="tabs" id="tabs">
       <button class="tab on" data-view="card">我的名片</button>
       <button class="tab" data-view="wall">扩列墙</button>
+      <button class="tab" data-view="map">地图</button>
       <button class="tab" data-view="settings">设置</button>
     </nav>
     <div class="tb-right">
@@ -32,11 +30,10 @@
 
 <main class="main">
 
-  <!-- ============ 我的名片 ============ -->
+  <!-- ==================== 我的名片 ==================== -->
   <section class="view" id="view-card">
     <div class="split">
 
-      <!-- 左：预览 -->
       <div class="preview-pane">
         <div class="sect-h">
           <h2>名片预览</h2>
@@ -45,54 +42,77 @@
             <button class="btn-filled" id="btnShare">分享链接</button>
           </div>
         </div>
+
         <div class="card-wrap">
           <div class="fcard" id="fcard">
             <div class="fcard__cover" id="fcCover">
+              <img class="fcard__bg" id="fcBg" alt="" hidden>
               <div class="fcard__avatar" id="fcAvatar">🦊</div>
             </div>
             <div class="fcard__body">
               <div class="fcard__name" id="fcName">未命名</div>
               <div class="fcard__species" id="fcSpecies">未填写兽种</div>
+              <div class="fcard__loc" id="fcLoc" hidden></div>
               <div class="fcard__tags" id="fcTags"></div>
               <div class="fcard__bio" id="fcBio"></div>
               <div class="fcard__rows" id="fcRows"></div>
               <div class="fcard__qq" id="fcQq" hidden></div>
-              <div class="fcard__foot">
-                <span id="fcFoot">用 Furry 扩列墙制作</span>
-              </div>
+              <div class="fcard__foot"><span id="fcFoot">用 Furry 扩列地图制作</span></div>
             </div>
           </div>
         </div>
+
+        <!-- 图片上传 -->
+        <div class="upload-box">
+          <div class="sect-h sm"><h2>上传图片</h2></div>
+          <div class="up-row">
+            <button class="btn-tonal" id="btnAvatar">选择头像</button>
+            <span class="up-note" id="avatarNote">未设置</span>
+            <button class="btn-txt" id="btnAvatarClear" hidden>移除</button>
+          </div>
+          <div class="up-row">
+            <button class="btn-tonal" id="btnBg">选择背景</button>
+            <span class="up-note" id="bgNote">未设置</span>
+            <button class="btn-txt" id="btnBgClear" hidden>移除</button>
+          </div>
+          <p class="hintline">图片会自动压缩后存在本机（头像 240×240，背景 680×240）。分享链接里<b>不含</b>图片，只有导出图片才会带上。</p>
+        </div>
       </div>
 
-      <!-- 右：表单 -->
       <div class="form-pane">
         <div class="sect-h"><h2>填写资料</h2></div>
 
         <div class="card">
+          <div class="fld"><label for="iName">兽设名 <b>*</b></label><input id="iName" type="text" maxlength="16" placeholder="比如：小夜"></div>
+          <div class="fld"><label for="iSpecies">兽种</label><input id="iSpecies" type="text" maxlength="24" placeholder="比如：雪狐"></div>
           <div class="fld">
-            <label for="iName">兽设名 <b>*</b></label>
-            <input id="iName" type="text" maxlength="16" placeholder="比如：黎夜">
-          </div>
-          <div class="fld">
-            <label for="iSpecies">兽种</label>
-            <input id="iSpecies" type="text" maxlength="24" placeholder="比如：巧克力小狼">
-          </div>
-          <div class="fld">
-            <label>头像 emoji</label>
+            <label>头像 emoji（不传图片时用这个）</label>
             <div class="emoji-pick" id="emojiPick"></div>
             <input id="iEmoji" type="text" maxlength="4" placeholder="或直接输入" class="mini">
           </div>
         </div>
 
         <div class="card">
-          <div class="sect-h sm"><h2>性格与兴趣</h2></div>
+          <div class="sect-h sm"><h2>所在位置</h2><span class="sect-h__note">会画在地图上</span></div>
           <div class="fld">
-            <label>性格标签（可多选）</label>
-            <div class="chip-pick" id="traitPick"></div>
+            <label for="iCity">城市</label>
+            <select id="iCity"></select>
           </div>
+          <div class="fld" id="customCoord" hidden>
+            <label>自定义坐标</label>
+            <div class="coord-row">
+              <input id="iLng" type="number" step="0.01" placeholder="经度 73-136">
+              <input id="iLat" type="number" step="0.01" placeholder="纬度 18-54">
+            </div>
+            <div class="hintline" id="coordHint"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sect-h sm"><h2>性格与兴趣</h2></div>
+          <div class="fld"><label>性格标签</label><div class="chip-pick" id="traitPick"></div></div>
           <div class="fld">
-            <label>兴趣标签（可多选）</label>
+            <label>兴趣标签</label>
             <div class="chip-pick" id="interestPick"></div>
             <input id="iCustomTag" type="text" maxlength="12" placeholder="自定义标签，回车添加" class="mini">
           </div>
@@ -100,56 +120,39 @@
 
         <div class="card">
           <div class="sect-h sm"><h2>详细资料</h2></div>
-          <div class="fld"><label for="iAge">年龄</label><input id="iAge" type="text" maxlength="12" placeholder="比如：3 岁（兽设年龄）"></div>
-          <div class="fld"><label for="iHeight">身高</label><input id="iHeight" type="text" maxlength="12" placeholder="比如：165 cm"></div>
-          <div class="fld"><label for="iColor">毛色</label><input id="iColor" type="text" maxlength="20" placeholder="比如：巧克力色 + 浅灰绒毛"></div>
+          <div class="fld"><label for="iAge">年龄</label><input id="iAge" type="text" maxlength="12"></div>
+          <div class="fld"><label for="iHeight">身高</label><input id="iHeight" type="text" maxlength="12"></div>
+          <div class="fld"><label for="iColor">毛色</label><input id="iColor" type="text" maxlength="20"></div>
           <div class="fld">
             <label for="iBio">自我介绍</label>
-            <textarea id="iBio" rows="4" maxlength="200" placeholder="写点想让别人知道的…"></textarea>
+            <textarea id="iBio" rows="4" maxlength="200"></textarea>
             <div class="counter"><span id="bioCount">0</span>/200</div>
           </div>
         </div>
 
         <div class="card">
-          <div class="sect-h sm">
-            <h2>QQ 扩列 <span class="tag-new">NEW</span></h2>
-            <span class="sect-h__note">填了 QQ 号，对方点一下就能加你</span>
-          </div>
+          <div class="sect-h sm"><h2>QQ 扩列</h2><span class="sect-h__note">填了 QQ，对方点一下就能加你</span></div>
           <div class="fld">
             <label for="iQQ">QQ 号</label>
-            <input id="iQQ" type="text" inputmode="numeric" maxlength="16" placeholder="填了会出现在名片上">
+            <input id="iQQ" type="text" inputmode="numeric" maxlength="16">
             <div class="hintline" id="qqHint">可留空</div>
           </div>
-          <div class="fld">
-            <label>扩列诉求（想找什么样的兽友，可多选）</label>
-            <div class="chip-pick" id="wantPick"></div>
-          </div>
-          <div class="fld">
-            <label for="iOnline">常在线时段</label>
-            <input id="iOnline" type="text" maxlength="24" placeholder="比如：工作日晚上 / 周末全天">
-            <div class="chip-pick" id="onlinePick" style="margin-top:8px"></div>
-          </div>
-          <div class="fld">
-            <label for="iGroup">常驻 QQ 群（选填）</label>
-            <input id="iGroup" type="text" maxlength="40" placeholder="群名或群号">
-          </div>
+          <div class="fld"><label>扩列诉求</label><div class="chip-pick" id="wantPick"></div></div>
+          <div class="fld"><label for="iOnline">常在线时段</label><input id="iOnline" type="text" maxlength="24"><div class="chip-pick" id="onlinePick" style="margin-top:8px"></div></div>
+          <div class="fld"><label for="iGroup">常驻 QQ 群</label><input id="iGroup" type="text" maxlength="40"></div>
         </div>
 
         <div class="card">
-          <div class="sect-h sm"><h2>其他联系方式（选填）</h2></div>
-          <div class="fld"><label for="iContact">微博 / Discord / Telegram 等</label><input id="iContact" type="text" maxlength="40" placeholder="选填"></div>
+          <div class="sect-h sm"><h2>其他联系方式</h2></div>
+          <div class="fld"><label for="iContact">微博 / Discord / Telegram 等</label><input id="iContact" type="text" maxlength="40"></div>
           <div class="fld">
             <label class="ck"><input type="checkbox" id="iHideContact"><span>分享时不显示任何联系方式</span></label>
-            <div class="hintline">勾上后，分享链接和导出图片里都不会出现 QQ 号 / 其他联系方式</div>
           </div>
         </div>
 
         <div class="card">
           <div class="sect-h sm"><h2>外观</h2></div>
-          <div class="fld">
-            <label>卡片主题色</label>
-            <div class="seed-pick" id="seedPick"></div>
-          </div>
+          <div class="fld"><label>卡片主题色</label><div class="seed-pick" id="seedPick"></div></div>
         </div>
 
         <div class="row-btns">
@@ -161,7 +164,7 @@
     </div>
   </section>
 
-  <!-- ============ 扩列墙 ============ -->
+  <!-- ==================== 扩列墙 ==================== -->
   <section class="view" id="view-wall" hidden>
     <div class="sect-h">
       <h2>我收藏的兽友 <span class="cnt" id="wallCount">0</span></h2>
@@ -170,14 +173,10 @@
         <button class="btn-filled" id="btnAddMine">加入我的名片</button>
       </div>
     </div>
-
     <div class="searchbar">
-      <span class="searchbar__ico">
-        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      </span>
-      <input id="wallSearch" type="search" placeholder="搜名字 / 兽种 / 标签…" autocomplete="off">
+      <span class="searchbar__ico"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+      <input id="wallSearch" type="search" placeholder="搜名字 / 兽种 / 标签 / 城市…" autocomplete="off">
     </div>
-
     <div class="wall" id="wall"></div>
     <div class="empty" id="wallEmpty" hidden>
       <div class="empty__ico">🐾</div>
@@ -186,23 +185,53 @@
     </div>
   </section>
 
-  <!-- ============ 设置 ============ -->
-  <section class="view" id="view-settings" hidden>
-    <div class="card">
-      <div class="sect-h sm"><h2>主题</h2></div>
-      <div class="fld">
-        <label>明暗</label>
-        <div class="seg" id="themePick">
-          <button data-v="light">浅色</button>
-          <button data-v="dark">深色</button>
+  <!-- ==================== 地图 ==================== -->
+  <section class="view" id="view-map" hidden>
+    <div class="sect-h">
+      <h2>兽友分布 <span class="cnt" id="mapCount">0</span></h2>
+      <div class="sect-h__act">
+        <div class="seg" id="radiusPick">
+          <button data-r="0" class="on">全部</button>
+          <button data-r="100">100km</button>
+          <button data-r="500">500km</button>
+          <button data-r="1500">1500km</button>
         </div>
       </div>
     </div>
 
+    <div class="map-layout">
+      <div class="map-pane">
+        <div class="map-box" id="mapBox">
+          <svg id="mapSvg" viewBox="-30 -30 690 474" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="map-tip" id="mapTip" hidden></div>
+        </div>
+        <div class="map-legend">
+          <span><i class="dot dot--me"></i>我</span>
+          <span><i class="dot dot--other"></i>兽友</span>
+          <span class="legend-note">轮廓为示意底图，点位按真实经纬度投影</span>
+        </div>
+        <div class="map-hint" id="mapHint" hidden></div>
+      </div>
+
+      <div class="near-pane">
+        <div class="sect-h sm"><h2>按距离排序</h2></div>
+        <div id="nearList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 设置 ==================== -->
+  <section class="view" id="view-settings" hidden>
+    <div class="card">
+      <div class="sect-h sm"><h2>主题</h2></div>
+      <div class="fld"><label>明暗</label>
+        <div class="seg" id="themePick"><button data-v="light">浅色</button><button data-v="dark">深色</button></div>
+      </div>
+    </div>
     <div class="card">
       <div class="sect-h sm"><h2>数据</h2></div>
       <div class="fld">
-        <label>我的名片与扩列墙都存在你自己的浏览器里（localStorage），不会上传到任何服务器。</label>
+        <label>全部数据存在你自己的浏览器（localStorage），不上传任何服务器。</label>
         <div class="row-btns">
           <button class="btn-tonal" id="btnExportJson">导出备份 JSON</button>
           <button class="btn-tonal" id="btnImportJson">导入备份</button>
@@ -211,25 +240,25 @@
       </div>
       <div class="fld"><div class="stat" id="dataStat"></div></div>
     </div>
-
     <div class="card">
       <div class="sect-h sm"><h2>关于</h2></div>
       <p class="about">
-        这是一个纯前端的兽设扩列工具。「分享链接」会把资料编码进网址，对方打开就能看到并一键收藏——
-        <b>整个过程不经过任何服务器</b>。<br><br>
-        <b>提醒：</b>联系方式会一并写进分享链接。如果不想公开，请把「分享时不显示联系方式」勾上，
-        或者干脆填在其他联系方式里单独发。
+        纯前端的兽设扩列工具。分享链接把资料编码进网址，对方打开就能看到并一键收藏——
+        <b>不经过任何服务器</b>。<br><br>
+        <b>提醒：</b>联系方式会写进链接（图片不会）。不想公开就勾上「分享时不显示任何联系方式」。<br><br>
+        <b>地图说明：</b>位置按你填的城市画在地图上，距离由经纬度算出，用于看「附近有谁」。
+        底图是简化的示意轮廓，不是测绘用图。
       </p>
     </div>
   </section>
 
 </main>
 
-<!-- 分享弹层 -->
+<!-- 分享 -->
 <div class="sheet" id="shareSheet" hidden>
   <div class="sheet__bd">
     <div class="sheet__hd"><h3>分享链接</h3><button class="icon-btn" id="shareClose">✕</button></div>
-    <p class="sheet__tx">复制下面的链接发给别人，对方打开就能看到你的名片并一键收藏。</p>
+    <p class="sheet__tx">复制发给别人，对方打开就能看到你的名片并一键收藏。链接里<b>不含图片</b>，对方看到的是 emoji 头像。</p>
     <textarea class="sheet__ta" id="shareUrl" readonly rows="3"></textarea>
     <div class="row-btns">
       <button class="btn-filled" id="btnCopyUrl">复制</button>
@@ -238,20 +267,20 @@
   </div>
 </div>
 
-<!-- 导入弹层 -->
+<!-- 导入 -->
 <div class="sheet" id="importSheet" hidden>
   <div class="sheet__bd">
     <div class="sheet__hd"><h3>导入分享链接</h3><button class="icon-btn" id="importClose">✕</button></div>
     <p class="sheet__tx">粘贴别人发给你的扩列链接。</p>
     <textarea class="sheet__ta" id="importUrl" rows="3" placeholder="https://…#c=…"></textarea>
-    <div class="row-btns">
-      <button class="btn-filled" id="btnDoImport">加入扩列墙</button>
-    </div>
+    <div class="row-btns"><button class="btn-filled" id="btnDoImport">加入扩列墙</button></div>
     <div class="sheet__err" id="importErr" hidden></div>
   </div>
 </div>
 
 <div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
+<input type="file" id="fileAvatar" accept="image/*" hidden>
+<input type="file" id="fileBg" accept="image/*" hidden>
 <input type="file" id="jsonFile" accept="application/json" hidden>
 
 <script src="data.js"></script>

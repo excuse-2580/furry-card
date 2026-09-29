@@ -35,7 +35,8 @@ const App = {
     if (savedTh) document.documentElement.setAttribute('data-theme', savedTh);
 
     this.applySeed(this.me.seed || 'violet');
-    this.renderCitySelect();
+    this.renderCitySelect('');
+    this.renderHotCities();
     this.renderPickers();
     this.fillForm(this.me);
     this.renderCard();
@@ -83,7 +84,24 @@ const App = {
       // 必须先切显隐再读数：坐标框隐藏时 input 不可见，
       // 若顺序反了，切到「自定义坐标」后输入框不会露出来。
       this.toggleCustom(document.getElementById('iCity').value === '__custom');
-      this.readForm(); this.renderCard(); this.renderCoordHint();
+      this.readForm();
+      this.renderHotCities();
+      this.renderCard(); this.renderCoordHint();
+    });
+
+    // 城市搜索过滤
+    const cs = document.getElementById('citySearch');
+    cs.addEventListener('input', () => this.renderCitySelect(cs.value));
+    cs.addEventListener('keydown', (e) => {
+      // 回车直接选中第一个结果，手机上省一次点击
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const first = document.querySelector('#iCity option:not([value=""]):not([value="__custom"])');
+      if (first) {
+        document.getElementById('iCity').value = first.value;
+        this.toggleCustom(false);
+        this.readForm(); this.renderHotCities(); this.renderCard(); this.renderCoordHint();
+      }
     });
     ['iLng', 'iLat'].forEach(id => document.getElementById(id).addEventListener('input', () => {
       this.readForm(); this.renderCoordHint(); this.renderCard();
@@ -247,6 +265,18 @@ const App = {
     } else { this.me.lng = null; this.me.lat = null; }
 
     this.syncQqHint();
+    this.autoSave();
+  },
+
+  /* 改动后自动落盘（防抖）。
+     之前只有点「保存到本机」才写，用户改完城市直接刷新就会丢——
+     这是本地工具，不该让人手动记着保存。 */
+  autoSave() {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => {
+      if (!this.me.name || !this.me.name.trim()) return;   // 没填名字就不存
+      if (this.persist()) this.updateStat();
+    }, 600);
   },
 
   fillForm(m) {
@@ -272,6 +302,7 @@ const App = {
       document.getElementById('iLat').value = m.lat ?? '';
     } else sel.value = '';
     this.toggleCustom(m.city === '__custom');
+    this.renderHotCities();
     this.syncQqHint();
     this.renderCoordHint();
   },
@@ -286,7 +317,7 @@ const App = {
     const { lng, lat } = this.me;
     if (lng == null || lat == null) { el.textContent = '填经纬度，或直接选上面的城市'; el.className = 'hintline'; return; }
     if (!Geo.inRange(lng, lat)) {
-      el.textContent = '坐标超出中国范围（经度 73-136，纬度 18-54），地图上不会显示';
+      el.textContent = `坐标超出中国范围（经度 ${Geo.LNG0}-${Geo.LNG1}，纬度 ${Geo.LAT1}-${Geo.LAT0}），地图上不会显示`;
       el.className = 'hintline warn'; return;
     }
     el.textContent = `✓ 会画在地图上（${lng.toFixed(2)}, ${lat.toFixed(2)}）`;
@@ -311,11 +342,59 @@ const App = {
   /* ============================================================
      位置
      ============================================================ */
-  renderCitySelect() {
+  /* ------------------------------------------------------------
+     城市下拉：347 个地级市，按省份分组 + 搜索过滤
+     直接渲染 347 个 option 在手机上根本没法用，所以：
+       - 搜索框输入时只留匹配项（带省份标签）
+       - 未搜索时按省份分组（optgroup），可折叠展开
+       - 常备「热门城市」快捷 chip
+     ------------------------------------------------------------ */
+  renderCitySelect(q) {
     const sel = document.getElementById('iCity');
-    sel.innerHTML = '<option value="">（不填）</option>'
-      + DATA.CITIES.map(c => `<option value="${c[0]}">${c[0]}</option>`).join('')
-      + '<option value="__custom">自定义坐标…</option>';
+    const hint = document.getElementById('cityHint');
+    const keep = sel.value;   // 保住当前选中项，避免重渲染时丢失
+
+    let html = '<option value="">（不填）</option>';
+
+    if (q && q.trim()) {
+      const hit = DATA.search(q);
+      if (!hit.length) {
+        hint.textContent = '没找到，换个词试试（也可以选「自定义坐标」）';
+        hint.className = 'hintline warn';
+      } else {
+        hint.textContent = `找到 ${hit.length} 个` + (hit.length >= 60 ? '（只显示前 60 个）' : '');
+        hint.className = 'hintline ok';
+      }
+      html += hit.map(c =>
+        `<option value="${this.esc(c[0])}">${this.esc(c[0])} · ${this.esc(c[3])}</option>`).join('');
+    } else {
+      hint.textContent = '';
+      const g = DATA.byProv();
+      for (const prov in g) {
+        html += `<optgroup label="${this.esc(prov)}">`
+          + g[prov].map(c => `<option value="${this.esc(c[0])}">${this.esc(c[0])}</option>`).join('')
+          + '</optgroup>';
+      }
+    }
+    html += '<option value="__custom">自定义坐标…</option>';
+    sel.innerHTML = html;
+
+    // 恢复选中（若该项被过滤掉了就放弃，避免回落到错误城市）
+    const still = Array.from(sel.options).some(o => o.value === keep);
+    sel.value = still ? keep : (this.me.city || '');
+  },
+
+  renderHotCities() {
+    const box = document.getElementById('hotCities');
+    if (!box) return;
+    box.innerHTML = DATA.HOT.map(c =>
+      `<button data-c="${this.esc(c)}" class="${this.me.city === c ? 'on' : ''}">${this.esc(c)}</button>`).join('');
+    box.querySelectorAll('button').forEach(b =>
+      b.addEventListener('click', () => {
+        document.getElementById('iCity').value = b.dataset.c;
+        document.getElementById('citySearch').value = '';
+        this.readForm(); this.renderCitySelect(''); this.renderHotCities(); this.renderCard();
+      }));
   },
 
   pos(m) {
@@ -598,11 +677,17 @@ const App = {
     out += `<polygon class="mp-outline" points="${poly(DATA.OUTLINE.hainan)}" />`;
     out += `<polygon class="mp-outline" points="${poly(DATA.OUTLINE.taiwan)}" />`;
 
-    // 城市底点（只画少量，避免太挤）
-    const showCities = ['北京', '上海', '广州', '成都', '西安', '哈尔滨', '乌鲁木齐', '拉萨', '昆明', '武汉'];
+    /* 城市底点：347 个全画（r=1.1 的淡点），形成"城市密度"的底图感；
+       名字只标 12 个主要城市，否则会糊成一片。 */
     for (const c of DATA.CITIES) {
-      if (!showCities.includes(c[0])) continue;
-      out += `<circle class="mp-city" cx="${Geo.x(c[1]).toFixed(1)}" cy="${Geo.y(c[2]).toFixed(1)}" r="1.6" />`;
+      out += `<circle class="mp-city" cx="${Geo.x(c[1]).toFixed(1)}" cy="${Geo.y(c[2]).toFixed(1)}" r="1.1" />`;
+    }
+    const labelCities = ['北京', '上海', '广州', '成都', '西安', '哈尔滨',
+                         '乌鲁木齐', '拉萨', '昆明', '武汉', '枣庄', '三亚'];
+    for (const n of labelCities) {
+      const c = DATA.CITIES.find(x => x[0] === n);
+      if (!c) continue;
+      out += `<text class="mp-city-label" x="${(Geo.x(c[1]) + 4).toFixed(1)}" y="${(Geo.y(c[2]) + 3).toFixed(1)}">${this.esc(n)}</text>`;
     }
 
     // ---- 兽友点 ----

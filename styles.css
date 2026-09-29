@@ -184,6 +184,28 @@ html[data-theme="light"] .ico-dark, html[data-theme="dark"] .ico-light { display
 .chip-pick button:hover { background: var(--surface-container-high); }
 .chip-pick button.on { background: var(--primary-container); color: var(--on-primary-container); border-color: transparent; }
 
+/* 城市搜索 + 热门城市 */
+.hint-inline { font-size: 11px; color: var(--outline); font-weight: 400; }
+#citySearch { margin-bottom: 8px; }
+#iCity {
+  width: 100%; padding: 10px 12px; border-radius: var(--r-s);
+  border: 1px solid var(--outline); background: var(--surface-container-lowest);
+  color: var(--on-surface); font-size: 14px; outline: none; min-height: 44px;
+}
+#iCity:focus { border-color: var(--primary); }
+#iCity optgroup { color: var(--on-surface-variant); font-style: normal; }
+.hot-cities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.hot-cities button {
+  height: 30px; padding: 0 12px; border-radius: var(--r-s);
+  font-size: 12px; font-weight: 500;
+  border: 1px solid var(--outline-variant); color: var(--on-surface-variant);
+  transition: background .12s var(--ease-std), color .12s var(--ease-std);
+}
+.hot-cities button:hover { background: var(--surface-container-high); }
+.hot-cities button.on {
+  background: var(--primary-container); color: var(--on-primary-container); border-color: transparent;
+}
+
 .seed-pick { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 16px; }
 .seed-pick button { width: 44px; height: 44px; border-radius: 50%; position: relative; transition: transform .12s var(--ease-std); }
 .seed-pick button:hover { transform: scale(1.08); }
@@ -245,8 +267,8 @@ html[data-theme="light"] .ico-dark, html[data-theme="dark"] .ico-light { display
 
 .mp-outline { fill: var(--surface-container); stroke: var(--outline-variant); stroke-width: 1.2; stroke-linejoin: round; }
 .mp-grid { stroke: var(--outline-variant); stroke-width: .6; opacity: .45; stroke-dasharray: 3 4; }
-.mp-city { fill: var(--outline); opacity: .55; }
-.mp-city-label { fill: var(--outline); font-size: 9px; opacity: .8; }
+.mp-city { fill: var(--outline); opacity: .38; }
+.mp-city-label { fill: var(--outline); font-size: 9px; opacity: .75; font-weight: 500; }
 
 .mp-dot { cursor: pointer; stroke: var(--surface-container-lowest); stroke-width: 2; }
 .mp-dot--other { fill: var(--seed); }

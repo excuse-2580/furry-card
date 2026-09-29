@@ -95,14 +95,17 @@
         <div class="card">
           <div class="sect-h sm"><h2>所在位置</h2><span class="sect-h__note">会画在地图上</span></div>
           <div class="fld">
-            <label for="iCity">城市</label>
-            <select id="iCity"></select>
+            <label for="citySearch">城市 <span class="hint-inline">347 个地级市可选</span></label>
+            <input id="citySearch" type="search" placeholder="搜城市名或省份，比如：枣庄" autocomplete="off">
+            <div class="hot-cities" id="hotCities"></div>
+            <select id="iCity" size="1"></select>
+            <div class="hintline" id="cityHint"></div>
           </div>
           <div class="fld" id="customCoord" hidden>
             <label>自定义坐标</label>
             <div class="coord-row">
               <input id="iLng" type="number" step="0.01" placeholder="经度 73-136">
-              <input id="iLat" type="number" step="0.01" placeholder="纬度 18-54">
+              <input id="iLat" type="number" step="0.01" placeholder="纬度 16-54">
             </div>
             <div class="hintline" id="coordHint"></div>
           </div>
@@ -202,7 +205,7 @@
     <div class="map-layout">
       <div class="map-pane">
         <div class="map-box" id="mapBox">
-          <svg id="mapSvg" viewBox="-30 -30 690 474" preserveAspectRatio="xMidYMid meet"></svg>
+          <svg id="mapSvg" viewBox="-30 -30 690 497" preserveAspectRatio="xMidYMid meet"></svg>
           <div class="map-tip" id="mapTip" hidden></div>
         </div>
         <div class="map-legend">
